@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Para vos, mi chica ♡</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      background: #1a0a2e;
+    }
+
+    .ts-wrap {
+      min-height: 100vh;
+      padding: 0 0 4rem;
+      position: relative;
+      overflow-x: hidden;
+      background: linear-gradient(160deg, #1a0a2e 0%, #2d1052 40%, #1a0a2e 100%);
+    }
+
+    canvas.stars-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── COVER ─────────────────────────────────────── */
+    .cover-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .era-badge {
+      font-family: 'Caveat', cursive;
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      color: #c9a96e;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .cover-title {
+      font-family: 'Caveat', cursive;
+      font-size: clamp(2.4rem, 8vw, 3.4rem);
+      font-weight: 700;
+      color: #f0e6ff;
+      line-height: 1.15;
+      margin-bottom: 0.3rem;
+      text-shadow: 0 0 40px rgba(180,130,255,0.5);
+    }
+
+    .cover-sub {
+      font-family: 'Kalam', cursive;
+      font-size: 1.1rem;
+      color: #c9a0ff;
+      margin: 0.9rem 0 2.5rem;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    .guitar-line {
+      font-size: 1.4rem;
+      letter-spacing: 10px;
+      margin-bottom: 2rem;
+      color: #c9a96e;
+    }
+
+    .btn-start {
+      font-family: 'Caveat', cursive;
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #7b2ff7, #c850c0);
+      border: none;
+      border-radius: 999px;
+      padding: 0.75rem 2.5rem;
+      cursor: pointer;
+      color: #fff;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 24px rgba(180,80,255,0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-start:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(180,80,255,0.65); }
+
+    .cover-quote {
+      font-family: 'Kalam', cursive;
+      font-size: 0.85rem;
+      color: rgba(200,160,255,0.45);
+      margin-top: 2.5rem;
+      font-style: italic;
+      max-width: 360px;
+    }
+
+    /* ── PAGES WRAPPER ─────────────────────────────── */
+    .pages-wrap {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      position: relative;
+      z-index: 2;
+    }
+    .pages-wrap.active { display: flex; }
+
+    /* ── PROGRESS ──────────────────────────────────── */
+    .progress-area {
+      width: 100%;
+      max-width: 620px;
+      margin-bottom: 1.5rem;
+    }
+    .prog-label {
+      font-family: 'Caveat', cursive;
+      font-size: 0.8rem;
+      color: rgba(200,160,255,0.55);
+      text-align: right;
+      margin-bottom: 5px;
+    }
+    .prog-track {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7b2ff7, #f472b6);
+      border-radius: 999px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    /* ── PAGES ─────────────────────────────────────── */
+    .page {
+      width: 100%;
+      max-width: 620px;
+      border-radius: 6px;
+      padding: 2.4rem 2.2rem 2.2rem;
+      position: relative;
+      margin-bottom: 1.2rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .page.visible { opacity: 1; transform: translateY(0); }
+
+    .page.era-midnights { background: linear-gradient(145deg, #0d0d2b, #1a1a4e); }
+    .page.era-lover     { background: linear-gradient(145deg, #2d0a3a, #3d1060); }
+    .page.era-ttpd      { background: linear-gradient(145deg, #1a0a2e, #2d1052); }
+    .page.era-fearless  { background: linear-gradient(145deg, #1c1200, #2d1e00); }
+    .page.era-evermore  { background: linear-gradient(145deg, #0a1a0a, #0f2710); }
+
+    /* tape */
+    .tape {
+      position: absolute;
+      width: 58px;
+      height: 19px;
+      border-radius: 2px;
+      background: rgba(255,220,100,0.22);
+      border: 0.5px solid rgba(255,200,50,0.22);
+    }
+    .tape.top-c { top: -9px; left: 50%; transform: translateX(-50%); }
+    .tape.top-l { top: -9px; left: 28px; rotate: -4deg; }
+    .tape.top-r { top: -9px; right: 28px; rotate: 4deg; }
+
+    /* era tag */
+    .era-tag {
+      display: inline-block;
+      font-family: 'Caveat', cursive;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 2px 10px;
+      border-radius: 999px;
+      margin-bottom: 0.8rem;
+      border: 0.5px solid rgba(255,255,255,0.12);
+    }
+    .era-tag.m { background: rgba(100,80,200,0.3); color: #b8a0ff; }
+    .era-tag.l { background: rgba(220,100,200,0.2); color: #f0a0e0; }
+    .era-tag.t { background: rgba(200,200,200,0.1); color: #d0d0d0; }
+    .era-tag.f { background: rgba(200,150,30,0.2);  color: #d4a830; }
+    .era-tag.e { background: rgba(60,120,60,0.25);  color: #80c880; }
+
+    /* ruled lines */
+    .ruled {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0.04;
+    }
+    .ruled::before {
+      content: '';
+      position: absolute;
+      top: 80px; left: 0; right: 0; bottom: 0;
+      background-image: repeating-linear-gradient(transparent, transparent 30px, #fff 30px, #fff 31px);
+    }
+
+    /* sticker */
+    .sticker {
+      position: absolute;
+      top: 14px; right: 18px;
+      font-family: 'Caveat', cursive;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+    .sticker.gold { background: rgba(212,175,55,0.25); color: #c9a96e; border: 0.5px solid rgba(212,175,55,0.3); rotate: 6deg; }
+    .sticker.pink { background: rgba(244,114,182,0.2); color: #f0a0d8; border: 0.5px solid rgba(244,114,182,0.25); rotate: -4deg; }
+
+    /* lyric pull */
+    .lyric-pull {
+      margin: 0.2rem 0 1rem;
+      padding: 0.65rem 1rem;
+      border-left: 2px solid rgba(200,160,255,0.3);
+      font-family: 'Caveat', cursive;
+      font-size: 1.05rem;
+      color: #c9a0ff;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    /* body text */
+    .page-text {
+      font-family: 'Kalam', cursive;
+      font-size: 1.08rem;
+      line-height: 1.9;
+      color: #e8d8ff;
+      white-space: pre-wrap;
+    }
+    .page-text strong { font-weight: 700; color: #f0e6ff; }
+    .page-text em     { font-style: italic; color: #c9a0ff; }
+
+    .divider {
+      font-family: 'Caveat', cursive;
+      font-size: 1rem;
+      color: rgba(200,160,255,0.35);
+      text-align: center;
+      margin: 0.9rem 0;
+      letter-spacing: 8px;
+    }
+
+    .corner-note {
+      position: absolute;
+      bottom: 12px; right: 16px;
+      font-family: 'Caveat', cursive;
+      font-size: 0.75rem;
+      color: rgba(200,160,255,0.38);
+      font-style: italic;
+    }
+
+    /* final page */
+    .final-page { text-align: center; padding: 2.8rem 2rem 3rem; }
+    .final-sign {
+      font-family: 'Caveat', cursive;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #f0e6ff;
+      display: block;
+      margin-top: 1.6rem;
+      line-height: 1.4;
+      text-shadow: 0 0 30px rgba(200,150,255,0.4);
+    }
+    .final-hearts {
+      display: block;
+      font-size: 1.4rem;
+      margin-top: 0.6rem;
+      letter-spacing: 8px;
+      color: #f472b6;
+    }
+
+    /* next button */
+    .btn-next {
+      font-family: 'Caveat', cursive;
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: none;
+      border: 1.5px solid rgba(180,100,255,0.45);
+      border-radius: 999px;
+      padding: 0.6rem 2.2rem;
+      cursor: pointer;
+      color: #c9a0ff;
+      display: block;
+      margin: 0.6rem auto 0;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease 0.65s, transform 0.4s ease 0.65s, background 0.2s;
+    }
+    .btn-next.visible { opacity: 1; transform: translateY(0); }
+    .btn-next:hover   { background: rgba(180,100,255,0.1); }
+
+    /* responsive tweaks */
+    @media (max-width: 480px) {
+      .page { padding: 2rem 1.4rem 1.8rem; }
+      .cover-title { font-size: 2.4rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="ts-wrap">
+  <canvas class="stars-bg" id="stars"></canvas>
+
+  <!-- COVER -->
+  <div class="cover-screen" id="cover">
+    <p class="era-badge">✦ una carta especial ✦</p>
+    <p class="cover-title">Para vos,<br>mi chica.</p>
+    <p class="cover-sub">
+      "Long story short, I survived."<br>
+      <span style="font-size:0.82rem;opacity:0.6">— Taylor Swift</span>
+    </p>
+    <div class="guitar-line">♪ ♫ ♪</div>
+    <button class="btn-start" onclick="startCarta()">Abrir carta ↓</button>
+    <p class="cover-quote">"She lost him but she found herself and somehow that was everything."</p>
+  </div>
+
+  <!-- PAGES -->
+  <div class="pages-wrap" id="pages">
+
+    <div class="progress-area">
+      <p class="prog-label" id="prog-label">página 1 de 7</p>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    </div>
+
+    <!-- Página 1 — Midnights -->
+    <div class="page era-midnights" id="page-0">
+      <div class="ruled"></div>
+      <div class="tape top-c"></div>
+      <span class="sticker gold">siempre ✦</span>
+      <span class="era-tag m">✦ midnights</span>
+      <div class="lyric-pull">"I had the time of my life fighting dragons with you."</div>
+      <p class="page-text">Cuando te tuve, tenía tu edad.
+
+Mientras muchas chicas estaban pensando en terminar el colegio, salir con amigas o decidir qué querían hacer con su vida, yo estaba <strong>aprendiendo a ser mamá</strong>.
+
+No fue fácil. Hubo momentos de miedo, cansancio e incertidumbre.
+
+Pero nunca dudé de vos.
+<strong>Nunca dudé de que valía la pena seguir adelante.</strong></p>
+    </div>
+
+    <!-- Página 2 — Lover -->
+    <div class="page era-lover" id="page-1">
+      <div class="ruled"></div>
+      <div class="tape top-l"></div>
+      <div class="tape top-r"></div>
+      <span class="sticker pink">lo elegí ♡</span>
+      <span class="era-tag l">♡ lover</span>
+      <p class="page-text">Desde que naciste trabajé todos los días para que no te faltara nada.
+
+Tomé decisiones pensando en vos, acomodé mi vida alrededor de tus necesidades y elegí una profesión que me permitiera estar cerca tuyo, acompañarte y cuidarte.
+
+Y quiero que sepas algo importante:</p>
+      <div class="divider">✦ ✦ ✦</div>
+      <p class="page-text"><strong>Nunca sentí que eso fuera una carga.</strong>
+
+Jamás me arrepentí de haberte tenido.
+Jamás me arrepentí de esforzarme por vos.</p>
+      <span class="corner-note">ni un solo día</span>
+    </div>
+
+    <!-- Página 3 — TTPD -->
+    <div class="page era-ttpd" id="page-2">
+      <div class="ruled"></div>
+      <div class="tape top-c"></div>
+      <span class="era-tag t">◇ the tortured poets dept.</span>
+      <div class="lyric-pull">"I sat joking and we talked all night, it was real and I knew it."</div>
+      <p class="page-text">Esta carta no nace del sacrificio.
+
+<strong>Nace del dolor.</strong>
+
+Porque siento que hay algo que todavía no lográs ver.
+
+Cuando hay problemas con el colegio, cuando me llaman constantemente, cuando tengo que faltar a reuniones, reorganizar mi trabajo, dar explicaciones... para vos puede ser un episodio más.
+
+Para mí no.</p>
+      <div class="divider">— — —</div>
+      <p class="page-text">Detrás de cada una de esas situaciones hay horas de preocupación, estrés, angustia y una enorme responsabilidad que termina cayendo sobre mis hombros.</p>
+    </div>
+
+    <!-- Página 4 — Fearless -->
+    <div class="page era-fearless" id="page-3">
+      <div class="ruled"></div>
+      <div class="tape top-l"></div>
+      <div class="tape top-r"></div>
+      <span class="era-tag f">★ fearless</span>
+      <div class="lyric-pull">"I had the best day with you today."</div>
+      <p class="page-text">Lo que me duele <em>no es</em> tener que hacerme cargo.
+
+Lo que me duele es sentir que <strong>no dimensionás el impacto que tienen tus decisiones sobre mí.</strong>
+
+A veces siento que conocés mi amor, pero no el esfuerzo que hay detrás de ese amor.
+
+No sabés cuántas veces seguí adelante agotada.
+Cuántas veces resolví cosas sola.
+Cuántas veces acomodé mi vida para estar cuando me necesitabas.</p>
+      <div class="divider">✦</div>
+      <p class="page-text">No te cuento esto para que me agradezcas.
+
+Te lo cuento porque ya tenés 16 años y creo que llegó el momento de entender que <strong>nuestras acciones también afectan a las personas que nos quieren.</strong></p>
+      <span class="corner-note">siempre estuve</span>
+    </div>
+
+    <!-- Página 5 — TTPD -->
+    <div class="page era-ttpd" id="page-4">
+      <div class="ruled"></div>
+      <div class="tape top-c"></div>
+      <span class="era-tag t">◇ the tortured poets dept.</span>
+      <div class="lyric-pull">"Long story short, I survived."</div>
+      <p class="page-text">Muchas veces, cuando intentamos hablar, siento que entramos en una discusión donde cada una está más preocupada por responder que por entender.
+
+Con los años aprendí algo que me hubiera gustado saber antes:</p>
+      <div class="divider">— — —</div>
+      <p class="page-text"><strong>Escuchar vale mucho más que hablar.</strong>
+
+Cuando escuchás de verdad, aprendés. Pensás. Reflexionás. Entendés cosas que quizás no habías visto.
+
+En cambio, cuando uno responde automáticamente, busca justificarse o quiere tener la última palabra, deja de escuchar lo importante.
+
+<em>No hace falta levantar la voz para ser escuchado.</em></p>
+    </div>
+
+    <!-- Página 6 — Evermore -->
+    <div class="page era-evermore" id="page-5">
+      <div class="ruled"></div>
+      <div class="tape top-l"></div>
+      <div class="tape top-r"></div>
+      <span class="era-tag e">✿ evermore</span>
+      <div class="lyric-pull">"I once believed love would be burning red but it's golden."</div>
+      <p class="page-text">Las personas que tienen algo valioso para decir no necesitan gritar para que los demás las escuchen.
+
+La razón no se demuestra gritando.
+La verdad no necesita volumen.
+
+Cuando una persona habla con honestidad, coherencia y respeto, tarde o temprano siempre es escuchada.</p>
+      <div class="divider">✦ ✦ ✦</div>
+      <p class="page-text"><em>No necesito que estés de acuerdo conmigo en todo.</em>
+
+Solo necesito sentir que, antes de responderme, <strong>intentaste entenderme.</strong>
+
+Porque crecer no es solamente cumplir años. Crecer también es hacerse responsable de las propias decisiones y comprender cómo impactan en los demás.</p>
+    </div>
+
+    <!-- Página 7 — Final / Lover -->
+    <div class="page era-lover final-page" id="page-6">
+      <div class="ruled"></div>
+      <div class="tape top-c"></div>
+      <span class="era-tag l">♡ para siempre</span>
+      <div class="lyric-pull">"I'll be loving you forever."</div>
+      <p class="page-text">Yo sé la persona inteligente, sensible y buena que sos.
+La veo todos los días.
+Por eso sé que podés hacerlo mejor.
+
+No espero perfección.
+
+<strong>Espero conciencia.</strong>
+
+Espero que empieces a mirar un poco más allá de vos misma y que entiendas que detrás de cada esfuerzo, cada límite, cada conversación difícil y cada preocupación, hay una mamá que lleva 16 años intentando dar lo mejor de sí.
+
+Y si hay algo que nunca te faltó,</p>
+      <div class="divider">♡ ♡ ♡</div>
+      <p class="page-text" style="text-align:center; font-size:1.3rem;"><strong>fue amor.</strong></p>
+      <span class="final-sign">Con todo mi amor,<br>mamá</span>
+      <span class="final-hearts">♡ ♡ ♡</span>
+    </div>
+
+    <button class="btn-next" id="btn-next" onclick="nextPage()">seguir leyendo →</button>
+  </div>
+</div>
+
+<script>
+  const TOTAL = 7;
+  let current = -1;
+
+  function drawStars() {
+    const c = document.getElementById('stars');
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+    ctx.clearRect(0, 0, c.width, c.height);
+    for (let i = 0; i < 180; i++) {
+      const x = Math.random() * c.width;
+      const y = Math.random() * c.height;
+      const r = Math.random() * 1.3 + 0.2;
+      const a = Math.random() * 0.65 + 0.1;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,' + a + ')';
+      ctx.fill();
+    }
+  }
+
+  drawStars();
+  window.addEventListener('resize', drawStars);
+
+  function startCarta() {
+    document.getElementById('cover').style.display = 'none';
+    document.getElementById('pages').classList.add('active');
+    showPage(0);
+  }
+
+  function showPage(idx) {
+    current = idx;
+    const page = document.getElementById('page-' + idx);
+    if (!page) return;
+    setTimeout(function() { page.classList.add('visible'); }, 80);
+    updateProgress();
+    const btn = document.getElementById('btn-next');
+    if (idx < TOTAL - 1) {
+      btn.textContent = 'seguir leyendo →';
+      btn.classList.add('visible');
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  function nextPage() {
+    if (current >= TOTAL - 1) return;
+    const btn = document.getElementById('btn-next');
+    btn.classList.remove('visible');
+    setTimeout(function() { showPage(current + 1); }, 200);
+  }
+
+  function updateProgress() {
+    var pct = Math.round(((current + 1) / TOTAL) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-label').textContent = 'página ' + (current + 1) + ' de ' + TOTAL;
+  }
+</script>
+</body>
+</html>
